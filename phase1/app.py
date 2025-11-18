@@ -28,3 +28,6 @@ def load_data(filepath):
 
 def main():
     st.title("⚠️ Controversy Early Warning System Dashboard")
+
+if __name__ == "__main__":
+    main()
