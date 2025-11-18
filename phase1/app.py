@@ -78,13 +78,13 @@ def main():
     st.write("This score is the percentage of all analyzed comments that were flagged as 'Negative'.")
     
     # We use st.gauge to create a "speedometer" dial
-    st.gauge(
-        value=neg_percentage,
-        min_value=0,
-        max_value=100,
-        label="Negative Sentiment %",
-        format_string=f"{neg_percentage:.1f}%"
-    )
+    # st.gauge(
+    #     value=neg_percentage,
+    #     min_value=0,
+    #     max_value=100,
+    #     label="Negative Sentiment %",
+    #     format_string=f"{neg_percentage:.1f}%"
+    # )
 
     # --- 2. High-Level Sentiment Counts ---
     st.header("Sentiment Breakdown")
