@@ -21,13 +21,42 @@ def load_data(filepath):
     for streamlit."""
 
     if not filepath.exists():
-        st.error(f"Analyzed file not present in path {ANALYZED_CSV_PATH}")
+        st.error(f"Analyzed file not present in path {filepath}")
         return None
     
     return pd.read_csv(filepath)
 
 def main():
     st.title("⚠️ Controversy Early Warning System Dashboard")
+    st.subheader("First version of project, using Hasan Piker's Dog Collar Incident of June 2024")
+    st.markdown("""
+    This dashboard presents the results of the first version of the
+    Controversy Early Warning System (CEWS) pipeline. The pipeline scrapes
+    YouTube comments from selected videos and analyzes them using local
+    machine learning models for:
+    * Sentiment Analysis.
+    * Keyword Extraction.
+    """
+    )
+
+    # Load data
+    df = load_data(ANALYZED_CSV_PATH)
+
+    if df is None:
+        st.error(
+            f"Data not found in path: {ANALYZED_CSV_PATH}"
+            "Please rerun offline pipeline."
+        )
+        st.stop()
+    
+    # High Level view
+    st.header("High Level Overview")
+    st.markdown("Sentiment Summary:\n"
+                
+          f"Positive: {len(df[df['sentiment_label']=='Positive'])}\n"
+          f"Neutral: {len(df[df['sentiment_label']=='Neutral'])}\n"
+          f"Negative: {len(df[df['sentiment_label']=='Negative'])}\n")
+    
 
 if __name__ == "__main__":
     main()
