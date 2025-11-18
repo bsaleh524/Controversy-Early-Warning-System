@@ -63,15 +63,12 @@ def analyze_sentiment(texts, sentiment_pipeline):
         List[dict]: List of dicts with 'label' and 'score' for the texts.
     """
     
-    # Truncate long comments for 512 tokens due to 
-    # sentiment model limit
-    truncated_texts = [text[:512] for text in texts]
-
-    # Run Pipeline on text
+    # Run Pipeline on text. Ensure Truncation happens due to sentiment model limits
     results = sentiment_pipeline(
-        truncated_texts,
+        texts,
         batch_size=128,
-        truncation=True
+        truncation=True,
+        max_length=512
     )
 
     # Acquire labels and scores
@@ -113,7 +110,7 @@ def extract_keywords(texts, keyword_model, top_n=5):
     formatted_keywords = []
     for keyword_tuple in keyword_results:
         # Join phrases with a comma
-        phrases = [kw[o] for kw in doc_keywords]
+        phrases = [kw[0] for kw in keyword_tuple]
         formatted_keywords.append(", ".join(phrases))
     
     return formatted_keywords
@@ -147,7 +144,8 @@ def run_analysis():
     df['sentiment_label'] = labels
     df['sentiment_score'] = scores
 
-    print(f"Sentiment analysis completed in {end_time - start_time:.2f} seconds.\n")
+    end_time_kw = timer()
+    print(f"Sentiment analysis completed in {end_time_kw - start_time:.2f} seconds.\n")
 
     # Begin Investigating Negative comments from keywords
     df['keywords'] = ""
