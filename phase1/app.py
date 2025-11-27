@@ -113,7 +113,7 @@ def main():
     st.dataframe(
         keyword_counts.head(20), 
         column_config={"index": "Keyword", "value": "Count"},
-        use_container_width=True
+        width='stretch',
     )
 
 if __name__ == "__main__":
