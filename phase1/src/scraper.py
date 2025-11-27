@@ -1,67 +1,41 @@
 # src/scraper.py
-
 import os
 import pandas as pd
-from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-import sys
+from utils.youtube import setup_youtube_client
+import yaml
 
-# --- Configuration ---
-
-# Define the path to write the data
-DATA_DIR = "data"
-CSV_FILE_PATH = os.path.join(DATA_DIR, "raw_comments.csv")
-
-# These are the specific, high-comment videos about the scandal.
-# This provides a perfect, concentrated dataset for the "Back-Tester" MVP.
-VIDEO_IDS_TO_SCRAPE = [
-    'AzPIgPTPuOA',  # "How to Mistreat Your Dog & Fail to Get Away With It..." (9.9K+ comments)
-    'aAVr72W1MHI',  # "xQc Just FINISHED on Hasan" (3.1K+ comments)
-    'R2smNd9FBHc',  # "Dog Expert Reacts To Hasan Piker Dog Abuse Drama" (5.9K+ comments)
-    'vYhclZkPcvk',  # "xQc Reacts to Another Clip of Hasan Using Shock Collar..." (2.4K+ comments)
-    '1K0GJlQGxIk',  # "Streamer Hasan Piker Accused of Using a Shock Collar..." (1.1K+ comments)
-]
 
 # --- Main Functions ---
 
-def setup_youtube_client():
-    """
-    Loads API credentials from .env and builds the YouTube API service.
-    """
-    api_key = os.environ["YOUTUBE_API_KEY"]
-
-    if not api_key:
-        raise ValueError("Missing YOUTUBE_API_KEY in .env file.")
-
-    try:
-        # Build the service object
-        youtube = build('youtube', 'v3', developerKey=api_key)
-        print("Successfully authenticated with YouTube Data API v3.")
-        return youtube
-    except Exception as e:
-        print(f"Error building YouTube client: {e}")
-        sys.exit(1)
-
-
-def scrape_comments():
+def load_video_ids(data_dir: str):
+    """Loads video IDs from a data YAML file."""
+    data_path = os.path.join(data_dir, "video_ids.yaml")
+    with open(data_path, 'r') as file:
+        yaml_ids = yaml.safe_load(file)
+    return yaml_ids.get("VIDEO_IDS_TO_SCRAPE", [])
+    
+def scrape_comments(data_dir: str, csv_path: str):
     """
     Scrapes comments from the defined video IDs and saves them to a CSV file.
     """
 
-    if os.path.exists(CSV_FILE_PATH):
-        print(f"Comments data already exists at {CSV_FILE_PATH}. Skipping scraping.")
-        return pd.read_csv(CSV_FILE_PATH)
+    if os.path.exists(csv_path):
+        print(f"Comments data already exists at {csv_path}. Skipping scraping.")
+        return pd.read_csv(csv_path)
     youtube = setup_youtube_client()
     
     # Ensure the data directory exists
-    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(data_dir, exist_ok=True)
 
-    print(f"Starting scrape. Data will be saved to '{CSV_FILE_PATH}'")
+    print(f"Starting scrape. Data will be saved to '{csv_path}'")
     
     all_comments_data = [] # A list to hold all our comment data (as dicts)
 
     # --- Outer loop: Iterate through each Video ---
-    for video_id in VIDEO_IDS_TO_SCRAPE:
+    video_ids = load_video_ids(data_dir)
+    print(f"video_ids loaded: {video_ids}")
+    for video_id in video_ids:
         print(f"\nFetching comments from video ID: {video_id}")
         
         try:
@@ -133,9 +107,13 @@ def scrape_comments():
     df = pd.DataFrame(all_comments_data)
     
     # Save the DataFrame to a CSV file
-    df.to_csv(CSV_FILE_PATH, index=False, encoding='utf-8')
+    df.to_csv(csv_path, index=False, encoding='utf-8')
     
     print(f"Total comments scraped: {len(df)}")
-    print(f"Data saved to: {CSV_FILE_PATH}")
+    print(f"Data saved to: {csv_path}")
 
     return df
+
+# Scrape titles
+
+# Scrape users

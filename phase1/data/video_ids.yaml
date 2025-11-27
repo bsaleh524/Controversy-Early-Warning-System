@@ -1,0 +1,8 @@
+# These are the specific, high-comment videos about the scandal.
+# This provides a perfect, concentrated dataset for the "Back-Tester" MVP.
+VIDEO_IDS_TO_SCRAPE:
+  - 'AzPIgPTPuOA'  # "How to Mistreat Your Dog & Fail to Get Away With It..." (9.9K+ comments)
+  - 'aAVr72W1MHI'  # "xQc Just FINISHED on Hasan" (3.1K+ comments)
+  - 'R2smNd9FBHc'  # "Dog Expert Reacts To Hasan Piker Dog Abuse Drama" (5.9K+ comments)
+  - 'vYhclZkPcvk'  # "xQc Reacts to Another Clip of Hasan Using Shock Collar..." (2.4K+ comments)
+  - '1K0GJlQGxIk'  # "Streamer Hasan Piker Accused of Using a Shock Collar..." (1.1K+ comments)

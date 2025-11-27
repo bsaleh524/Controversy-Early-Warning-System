@@ -41,10 +41,10 @@ def load_models():
 
     # Create pipeline for batching
     sentiment_pipeline = pipeline(
-        "sentiment-analysis",
+        task="sentiment-analysis",
         model=sentiment_model,
         tokenizer=sentiment_tokenizer,
-        device=device
+        device=device,
     )
 
     # Load Keyword Model
@@ -115,7 +115,7 @@ def extract_keywords(texts, keyword_model, top_n=5):
     
     return formatted_keywords
 
-def run_analysis():
+def run_analysis(csv_path: str):
     """Run sentiment and keyword analysis pipeline on CSV data."""
 
     # Load Models
@@ -123,10 +123,10 @@ def run_analysis():
     sentiment_pipeline, keyword_model, _ = load_models()
     
     # Find Data and load it
-    if not os.path.exists(RAW_CSV_PATH):
+    if not os.path.exists(csv_path):
         raise FileNotFoundError(f"Raw data CSV not found at {RAW_CSV_PATH}\n")
-    print(f"Loading csv data from {RAW_CSV_PATH}...\n")
-    df = pd.read_csv(RAW_CSV_PATH)
+    print(f"Loading csv data from {csv_path}...\n")
+    df = pd.read_csv(csv_path)
 
     # Clean data before processing
     df.dropna(subset=['body'], inplace=True)

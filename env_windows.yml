@@ -1,0 +1,28 @@
+name: contro_v1
+channels:
+  - defaults
+  - conda-forge
+  - nvidia
+dependencies:
+  - python=3.12.10
+  - numpy
+  - ipykernel
+  - ipywidgets
+  - google-api-python-client
+  - google-api-core
+  - pandas
+  - matplotlib
+  - transformers
+  - keybert
+  - plotly
+  - streamlit
+  - scikit-learn
+  - cuda
+  - pip
+  - pip:
+    - torch
+    - torchvision
+    - torchaudio
+    - --index-url https://download.pytorch.org/whl/cu128
+    - streamlit-agraph # May need to be installed seperately
+# conda env remove -n contro_v1 --yes; conda env create -f env_windows.yml

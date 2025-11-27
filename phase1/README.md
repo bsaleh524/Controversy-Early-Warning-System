@@ -1,4 +1,6 @@
-Phase 1: The "Back-Tester" (The MVP)
+Phase 1: Single Scandel streamlit test app (The MVP)
+
+Goal: Prove the core "Scandal-O-Meter" logic works on one past, known event. This is the entire deliverable for your initial YouTube video.
 
 Goal: Prove the core "Scandal-O-Meter" logic works on one past, known event. This is the entire deliverable for your initial YouTube video.
 
