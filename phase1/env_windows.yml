@@ -1,26 +1,45 @@
 name: contro_v1
 channels:
-  - defaults
   - conda-forge
-  - nvidia
 dependencies:
   - python=3.12.10
-  - numpy
   - ipykernel
   - ipywidgets
   - google-api-python-client
-  - google-api-core
+  # - google-auth-httplib2
+  # - google-auth-oauthlib
+  - numpy
   - pandas
   - matplotlib
+  - scikit-learn
+  - plotly
   - transformers
   - keybert
-  - plotly        # <-- ADD THIS for interactive charts
-  - streamlit     # <-- ADD THIS for the web app
-  - pip
-  - pip:
-    - torch
-    - torchvision
-    - torchaudio
-    - --index-url https://download.pytorch.org/whl/cu128
-
-# conda env remove -n contro_v1 --yes; conda env create -f phase1/env_windows.yml
+  - streamlit
+  - protobuf==3.20.*  # Fix for Google API compatibility issues
+  # - streamlit-agraph
+  # - pip
+  # - pip:
+    # Core Data Science (Install via Pip to avoid DLL conflicts with Torch)
+    # - numpy
+    # - pandas
+    # - matplotlib
+    # - scikit-learn
+    # - plotly
+    
+    # # AI / ML
+    # - transformers
+    # - keybert
+    # - streamlit
+    # - streamlit-agraph
+    
+    
+    # PyTorch (Stable CUDA 12.4 is safest right now)
+    # The --index-url is critical. cu130 is experimental; cu124 is stable.
+    # - torch
+    # - torchvision
+    # - --index-url https://download.pytorch.org/whl/cu128
+    # - streamlit-agraph # May need to be installed seperately
+# mamba env remove -n contro_v1 --yes; mamba env create -f env_windows_fixing.yml
+# requires mamba install with conda install mamba in base environment, then do the
+# mamba commands above to recreate the environment
