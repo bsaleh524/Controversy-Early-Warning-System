@@ -43,3 +43,26 @@ dependencies:
 # mamba env remove -n contro_v1 --yes; mamba env create -f env_windows_fixing.yml
 # requires mamba install with conda install mamba in base environment, then do the
 # mamba commands above to recreate the environment
+
+# Thus you must initialize your shell before using activate and deactivate.
+
+# To initialize the current zsh shell, run:
+#     $ eval "$(mamba shell hook --shell zsh)"
+# and then activate or deactivate with:
+#     $ mamba activate
+# To automatically initialize all future (zsh) shells, run:
+#     $ mamba shell init --shell zsh --root-prefix=~/.local/share/mamba
+# If your shell was already initialized, reinitialize your shell with:
+#     $ mamba shell reinit --shell zsh
+# Otherwise, this may be an issue. In the meantime you can run commands. See:
+#     $ mamba run --help
+
+# In proper order:
+# mamba shell init --shell zsh --root-prefix=~/.local/share/mamba
+# open new terminal
+# uninstall env you just made(because mamba didnt have permission earlier)
+# reinstall normally
+# activate normally.
+# Basically, let mamba redo env again, it gives ability to make env
+#   in the proper location. and a new terminal allows the shell to
+#   init properly
