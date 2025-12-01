@@ -19,3 +19,29 @@ def setup_youtube_client():
     except Exception as e:
         print(f"Error building YouTube client: {e}")
         sys.exit(1)
+
+def fetch_channel_details(youtube, channel_ids):
+    """
+    Fetches snippet (title, description, thumbnails) for a list of channel IDs.
+    """
+    print(f"Fetching details for {len(channel_ids)} channels...")
+    
+    # The API accepts a comma-separated string of IDs
+    ids_string = ",".join(channel_ids)
+    
+    request = youtube.channels().list(
+        part="snippet,statistics",
+        id=ids_string
+    )
+    response = request.execute()
+    
+    channels_data = []
+    for item in response['items']:
+        channels_data.append({
+            "id": item['id'],
+            "title": item['snippet']['title'],
+            "description": item['snippet']['description'],
+            "thumbnail": item['snippet']['thumbnails']['default']['url'],
+            "subscribers": item['statistics']['subscriberCount']
+        })
+    return channels_data

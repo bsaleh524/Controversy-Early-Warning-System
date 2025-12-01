@@ -2,7 +2,7 @@
 import os
 import pandas as pd
 from googleapiclient.errors import HttpError
-from utils.youtube import setup_youtube_client
+from youtube import setup_youtube_client
 import yaml
 
 
@@ -14,6 +14,13 @@ def load_video_ids(data_dir: str):
     with open(data_path, 'r') as file:
         yaml_ids = yaml.safe_load(file)
     return yaml_ids.get("VIDEO_IDS_TO_SCRAPE", [])
+
+def load_channel_info(data_dir: str):
+    """Loads video IDs from a data YAML file."""
+    data_path = os.path.join(data_dir, "channel_ids.yaml")
+    with open(data_path, 'r') as file:
+        yaml_ids = yaml.safe_load(file)
+    return yaml_ids.get("CHANNEL_IDS", [])
     
 def scrape_comments(data_dir: str, csv_path: str):
     """
@@ -113,6 +120,32 @@ def scrape_comments(data_dir: str, csv_path: str):
     print(f"Data saved to: {csv_path}")
 
     return df
+
+def fetch_channel_details(youtube, channel_ids):
+    """
+    Fetches snippet (title, description, thumbnails) for a list of channel IDs.
+    """
+    print(f"Fetching details for {len(channel_ids)} channels...")
+    
+    # The API accepts a comma-separated string of IDs
+    ids_string = ",".join(channel_ids)
+    
+    request = youtube.channels().list(
+        part="snippet,statistics",
+        id=ids_string
+    )
+    response = request.execute()
+    
+    channels_data = []
+    for item in response['items']:
+        channels_data.append({
+            "id": item['id'],
+            "title": item['snippet']['title'],
+            "description": item['snippet']['description'],
+            "thumbnail": item['snippet']['thumbnails']['default']['url'],
+            "subscribers": item['statistics']['subscriberCount']
+        })
+    return channels_data
 
 # Scrape titles
 

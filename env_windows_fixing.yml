@@ -1,4 +1,4 @@
-name: contro_v1
+name: contro
 channels:
   - conda-forge
 dependencies:
@@ -14,6 +14,7 @@ dependencies:
   - scikit-learn
   - plotly
   - transformers
+  - sentence-transformers
   - keybert
   - streamlit
   - protobuf==3.20.*  # Fix for Google API compatibility issues

@@ -1,5 +1,5 @@
 import os
-from src.scraper import scrape_comments
+from utils.scraper import scrape_comments
 from src.data_analyzer import run_analysis
 from timeit import default_timer as timer
 

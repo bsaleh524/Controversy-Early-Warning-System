@@ -2,70 +2,16 @@ import os
 import json
 import pandas as pd
 import numpy as np
-from googleapiclient.discovert import build
+from googleapiclient.discovery import build
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from utils.youtube import setup_youtube_client, fetch_channel_details
+from utils.scraper import load_channel_info
 
 DATA_DIR = "data"
 GRAPH_FILE_PATH = os.path.join(DATA_DIR, "graph_data.json")
 
-# Select a set of example people to make a graph
-# of first, then implement a live model.
-# Mix contains Gaming, Commentary, Politics
-EXAMPLE_PEOPLE = {
-    "PewDiePie": "UC-lHJZR3Gqxm24_Vd_AJ5Yw",
-    "MrBeast": "UCX6OQ3DkcsbYNE6H8uQQuVA",
-    "Markiplier": "UC7_YxT-KID8kRbqZo7MyscQ",
-    "Jacksepticeye": "UChGJGhZ9SOOHvBB0Y4DOO_w",
-    "HasanAbi": "UCtoaZpBnrd0lhycxYJ4MNOQ",
-    "xQc": "UCmDTrq0LNgPodDOFZiSbsww",
-    "Ludwig": "UCrPseYLGpNygVi34QpGNqpA",
-    "MoistCr1TiKaL": "UCq6VFHwMzcMXbuKyG7SQYIg",
-    "H3 Podcast": "UCLtREJY21xRfCuEKvdki1Kw",
-    "Marques Brownlee": "UCBJycsmduvYl917o249m0vQ",  # Tech (Control group)
-    "Anthony Fantano": "UCt7fwAhXDy3oNFTAzF2o8Pw", # Music (Control group)
-    "Destiny": "UC554eY5jNUfDq3yDOJYirOQ",
-    "Vaush": "UC1E-JS8L0j1Ei70D9VEx98w",
-    "Kai Cenat": "UCqXLjvpUhqI1kwbS2855_7A",
-    "IShowSpeed": "UCjC3ZVqS3y9QvFp_1WjF1-A",
-    "The Majority Report": "UC-3jIAlnQmbbVMV6gR7K8aQ",
-}
-# --- Helper Functions ---
-
-def setup_youtube_client():
-    load_dotenv()
-    api_key = os.getenv("YOUTUBE_API_KEY")
-    if not api_key:
-        raise ValueError("Missing YOUTUBE_API_KEY in .env file.")
-    return build('youtube', 'v3', developerKey=api_key)
-
-def fetch_channel_details(youtube, channel_ids):
-    """
-    Fetches snippet (title, description, thumbnails) for a list of channel IDs.
-    """
-    print(f"Fetching details for {len(channel_ids)} channels...")
-    
-    # The API accepts a comma-separated string of IDs
-    ids_string = ",".join(channel_ids)
-    
-    request = youtube.channels().list(
-        part="snippet,statistics",
-        id=ids_string
-    )
-    response = request.execute()
-    
-    channels_data = []
-    for item in response['items']:
-        channels_data.append({
-            "id": item['id'],
-            "title": item['snippet']['title'],
-            "description": item['snippet']['description'],
-            "thumbnail": item['snippet']['thumbnails']['default']['url'],
-            "subscribers": item['statistics']['subscriberCount']
-        })
-    return channels_data
-
-def build_graph():
+def build_graph(yt_client):
     """
     Main execution flow:
     1. Fetch Channel Data
@@ -76,12 +22,16 @@ def build_graph():
     print("--- Starting Graph Builder ---")
     
     # 1. Fetch Data
-    youtube = setup_youtube_client()
+    yt_client = setup_youtube_client()
+    target_ids = load_channel_info(DATA_DIR)
+
+    channels_data = fetch_channel_details(yt_client, target_ids)
+    
     # Convert our dict values to a list of IDs
-    target_ids = list(CREATOR_IDS.values())
+    target_ids = list(channels_data.values())
     
     # API Hack: If list > 50, you need to batch. We have ~13, so one call is fine.
-    channels = fetch_channel_details(youtube, target_ids)
+    channels = fetch_channel_details(yt_client, target_ids)
     
     # 2. Generate Embeddings
     print("Loading embedding model (this runs locally)...")
@@ -140,4 +90,5 @@ def build_graph():
     print(f"Saved to {GRAPH_FILE_PATH}")
 
 if __name__ == "__main__":
-    build_graph()
+    yt_client = setup_youtube_client()
+    build_graph(yt_client)
