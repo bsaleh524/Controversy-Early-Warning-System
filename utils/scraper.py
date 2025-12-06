@@ -2,27 +2,27 @@
 import os
 import pandas as pd
 from googleapiclient.errors import HttpError
-from youtube import setup_youtube_client
+from utils.youtube import setup_youtube_client
 import yaml
 
 
 # --- Main Functions ---
 
-def load_video_ids(data_dir: str):
+def load_video_ids(yaml_dir: str):
     """Loads video IDs from a data YAML file."""
-    data_path = os.path.join(data_dir, "video_ids.yaml")
+    data_path = os.path.join(yaml_dir, "video_ids.yaml")
     with open(data_path, 'r') as file:
         yaml_ids = yaml.safe_load(file)
     return yaml_ids.get("VIDEO_IDS_TO_SCRAPE", [])
 
-def load_channel_info(data_dir: str):
+def load_channel_info(yaml_dir: str):
     """Loads video IDs from a data YAML file."""
-    data_path = os.path.join(data_dir, "channel_ids.yaml")
+    data_path = os.path.join(yaml_dir, "channel_ids.yaml")
     with open(data_path, 'r') as file:
         yaml_ids = yaml.safe_load(file)
     return yaml_ids.get("CHANNEL_IDS", [])
     
-def scrape_comments(data_dir: str, csv_path: str):
+def scrape_comments(data_dir: str, yaml_dir: str, csv_path: str):
     """
     Scrapes comments from the defined video IDs and saves them to a CSV file.
     """
@@ -40,7 +40,7 @@ def scrape_comments(data_dir: str, csv_path: str):
     all_comments_data = [] # A list to hold all our comment data (as dicts)
 
     # --- Outer loop: Iterate through each Video ---
-    video_ids = load_video_ids(data_dir)
+    video_ids = load_video_ids(yaml_dir)
     print(f"video_ids loaded: {video_ids}")
     for video_id in video_ids:
         print(f"\nFetching comments from video ID: {video_id}")

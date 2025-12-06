@@ -2,47 +2,72 @@
 # of first, then implement a live model.
 # Mix contains Gaming, Commentary, Politics
 CHANNEL_IDS:
-  - PewDiePie: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
-  - MrBeast: "UCX6OQ3DkcsbYNE6H8uQQuVA"
-  - Markiplier: "UC7_YxT-KID8kRbqZo7MyscQ"
-  - Jacksepticeye: "UChGJGhZ9SOOHvBB0Y4DOO_w"
-  - HasanAbi: "UCtoaZpBnrd0lhycxYJ4MNOQ"
-  - xQc: "UCmDTrq0LNgPodDOFZiSbsww"
-  - Ludwig: "UCrPseYLGpNygVi34QpGNqpA"
-  - MoistCr1TiKaL: "UCq6VFHwMzcMXbuKyG7SQYIg"
-  - H3 Podcast: "UCLtREJY21xRfCuEKvdki1Kw"
-  - Marques Brownlee: "UCBJycsmduvYl917o249m0vQ"  # Tech (Control group)
-  - Anthony Fantano: "UCt7fwAhXDy3oNFTAzF2o8Pw" # Music (Control group)
-  - Destiny: "UC554eY5jNUfDq3yDOJYirOQ"
-  - Vaush: "UC1E-JS8L0j1Ei70D9VEx98w"
-  - Kai Cenat: "UCqXLjvpUhqI1kwbS2855_7A"
-  - IShowSpeed: "UCjC3ZVqS3y9QvFp_1WjF1-A"
-  - The Majority Report: "UC-3jIAlnQmbbVMV6gR7K8aQ"
-  - babish
-  -maxmoefoe
-  -coldones
-  -drdisrespect
-  -sykkuno
-  -lilypichu
-  -disguisedtoast
-  -pokimane
-  -ninja
-  -shroud
-  -timthetatman
-  -dougdoug
-  -pointcrow
-  -Ludwig
-  -CoryxKenshin
-  -speeed
-  -manlybadasshero
-  -jaidenanimations
-  -theodd1sout
-  -dream
-  -peanutbuttergamer
-  -jeffnippard
-  -codebullet
-  -simonegiertz
-  -ididathing
-  -smartereveryday
-  -berm
+  PewDiePie: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
+  # - MrBeast: "UCX6OQ3DkcsbYNE6H8uQQuVA"
+  Markiplier: "UC7_YxT-KID8kRbqZo7MyscQ"
+  Jacksepticeye: "UChGJGhZ9SOOHvBB0Y4DOO_w"
+  # - HasanAbi: "UCtoaZpBnrd0lhycxYJ4MNOQ"
+  xQc: "UCmDTrq0LNgPodDOFZiSbsww"
+  Ludwig: "UCrPseYLGpNygVi34QpGNqpA"
+  MoistCr1TiKaL: "UCq6VFHwMzcMXbuKyG7SQYIg"
+  Kai Cenat: "UCqXLjvpUhqI1kwbS2855_7A"
+  IShowSpeed: "UCjC3ZVqS3y9QvFp_1WjF1-A"
+  # - H3 Podcast: "UCLtREJY21xRfCuEKvdki1Kw"
+  Marques Brownlee: "UCBJycsmduvYl917o249m0vQ"  # Tech (Control group)
+  Anthony Fantano: "UCt7fwAhXDy3oNFTAzF2o8Pw" # Music (Control group)
+  # - Destiny: "UC554eY5jNUfDq3yDOJYirOQ"
+  # - Vaush: "UC1E-JS8L0j1Ei70D9VEx98w"
+  # - The Majority Report: "UC-3jIAlnQmbbVMV6gR7K8aQ"
+  # - babish
+  # -maxmoefoe
+  # -coldones
+  # -drdisrespect
+  # -sykkuno
+  # -lilypichu
+  # -disguisedtoast
+  # -pokimane
+  # -ninja
+  # -shroud
+  # -timthetatman
+  # -dougdoug
+  # -pointcrow
+  # -Ludwig
+  # -CoryxKenshin
+  # -speeed
+  # -manlybadasshero
+  # -jaidenanimations
+  # -theodd1sout
+  # -dream
+  # -peanutbuttergamer
+  # -jeffnippard
+  # -codebullet
+  # -simonegiertz
+  # -ididathing
+  # -smartereveryday
+  # -bermpeakexpress
+  # -bravewilderness
+  # -markrober
+  # -dudeperfect
+  # -chilledchaos
+  # -annundefined
+  # -Zoneedsahobby
+  # -mikeboyd
+  # -mahalomydude
+  # -jordanboostmaster
+  # -yousuckatcooking
+  # -omarisuf
+  # -jontron
+  # -penguinz0
+  # -ai warehouse
+  # -neetcode
+  # -freecodecamp.org
+  # -tech with tim
+  # -alpharad
+  # -thestudio
+  # -william osman
+  # -greencode
+  # -3blue1brown
+  # -computerphile
+  # -neetcode
+  # -neetcodeio
 

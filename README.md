@@ -43,3 +43,14 @@ Problems:
 
 * Learned along the way
     - Must truncate texts due to token limitations of models
+
+* For embedding models:
+    The Problem with "Last 50 Videos"
+
+You suggested grabbing the last 50 video titles and descriptions. While more data is usually better, we hit two technical bottlenecks here:
+
+    The Context Window (Token Limit): The model we are using (all-MiniLM-L6-v2) has a limit (usually 256 or 384 tokens). 50 video titles + descriptions will result in thousands of tokens. The model will simply chop off the last 90% of your text. It won't even "see" videos 6 through 50.
+
+    The Noise Ratio: Video descriptions are often full of "boilerplate" junk: Merch links, social media handles, affiliate codes, and copyright disclaimers. This is "noise" that dilutes the "signal" (the actual topic).
+
+    
