@@ -1,120 +1,189 @@
 import streamlit as st
 import pandas as pd
+import json
+import os
 from pathlib import Path
+from streamlit_agraph import agraph, Node, Edge, Config
 
-DATA_DIR = Path("data")
-ANALYZED_CSV_PATH = DATA_DIR / "analyzed_data.csv"
-
-# Setup overall page configuration
+# --- Page Configuration ---
 st.set_page_config(
-    page_title="Controversy Early Warning System V1",
-    page_icon="⚠️",
+    page_title="Content Creator Mapping", #"Controversy Early Warning System",
+    page_icon="📉",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
+# --- Configuration ---
+DATA_DIR = Path("data")
+ANALYZED_CSV_PATH = DATA_DIR / "analyzed_data.csv"
+GRAPH_JSON_PATH = DATA_DIR / "graph_data.json"
 
+# --- Data Loading Functions ---
 
-# --- Data Loading ---
-@st.cache_data  # <-- Caching ensures we only load data once
-def load_data(filepath):
-    """Load analyzed CSV data, return a dataframe
-    for streamlit."""
-
+@st.cache_data
+def load_scandal_data(filepath):
+    """Loads Phase 1 Sentiment Data"""
     if not filepath.exists():
-        st.error(f"Analyzed file not present in path {filepath}")
         return None
-    
-    return pd.read_csv(filepath)
-    
     df = pd.read_csv(filepath)
-    
-    # CRITICAL: Convert timestamp string to a real datetime object
-    # We use errors='coerce' to handle any bad data
     df['timestamp_utc'] = pd.to_datetime(df['timestamp_utc'], errors='coerce')
-    
-    # Drop any rows that failed timestamp conversion
     df.dropna(subset=['timestamp_utc'], inplace=True)
-    
     return df
+
+@st.cache_data
+def load_graph_data(filepath):
+    """Loads Phase 2 Graph Data"""
+    if not filepath.exists():
+        return None
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+    return data
+
+# --- Tab 1: Scandal-O-Meter Logic ---
+# def render_scandal_dashboard(df):
+#     st.subheader("High-Level Summary: Hasan 'Shock Collar' Incident")
+
+#     # KPIs
+#     total_comments = len(df)
+#     sentiment_counts = df['sentiment_label'].value_counts()
+#     total_negative = sentiment_counts.get('Negative', 0)
+#     neg_percentage = (total_negative / total_comments) * 100 if total_comments > 0 else 0
+
+#     # Gauge
+#     col_gauge, col_stats = st.columns([1, 2])
+#     with col_gauge:
+#         st.write("### Scandal Score")
+#         st.gauge(
+#             value=neg_percentage,
+#             min_value=0,
+#             max_value=100,
+#             label="Negative Sentiment %",
+#             format_string=f"{neg_percentage:.1f}%"
+#         )
+#     with col_stats:
+#         st.write("### Sentiment Breakdown")
+#         c1, c2, c3 = st.columns(3)
+#         c1.metric("Negative", f"{total_negative:,}", delta_color="inverse")
+#         c2.metric("Positive", f"{sentiment_counts.get('Positive', 0):,}")
+#         c3.metric("Neutral", f"{sentiment_counts.get('Neutral', 0):,}")
+
+#     # Keywords
+#     st.divider()
+#     st.subheader("receipts: Top Negative Keywords")
+#     negative_comments = df[df['sentiment_label'] == 'Negative']
+#     keyword_counts = negative_comments['keywords'].str.split(', ').explode().value_counts()
+#     keyword_counts = keyword_counts[keyword_counts.index != '']
+    
+#     st.dataframe(
+#         keyword_counts.head(15), 
+#         column_config={"index": "Keyword", "value": "Count"},
+#         use_container_width=True
+#     )
+
+# --- Tab 2: Creator Galaxy Logic ---
+def render_creator_galaxy(graph_data):
+    st.subheader("The Creator Galaxy (Semantic Similarity)")
+    
+    col_graph, col_details = st.columns([3, 1])
+
+    with col_graph:
+        # 1. Convert JSON data to agraph Nodes
+        nodes = []
+        for n in graph_data['nodes']:
+            nodes.append(Node(
+                id=n['id'],
+                label=n['label'],
+                size=25,
+                shape="circularImage",
+                image=n['image'], # Displays their YouTube Avatar
+                title=f"{n['label']} ({n['subscribers']} subs)", # Hover text
+                # We use the calculated MDS coordinates for initial positioning
+                x=n.get('x', 0), 
+                y=n.get('y', 0)
+            ))
+
+        # 2. Convert JSON data to agraph Edges
+        edges = []
+        for e in graph_data['edges']:
+            edges.append(Edge(
+                source=e['source'],
+                target=e['target'],
+                # Thickness based on similarity score
+                width=e['weight'] * 2,
+                color="#cccccc"
+            ))
+
+        # 3. Configure the Graph Physics
+        config = Config(
+            width="100%",
+            height=600,
+            directed=False, 
+            nodeHighlightBehavior=True, 
+            highlightColor="#F7A241", # Orange highlight on hover
+            collapsible=False,
+            # Physics settings for a "bouncy" but stable graph
+            physics={
+                "enabled": True,
+                "stabilization": {"iterations": 100}
+            }
+        )
+
+        # 4. Render!
+        return_value = agraph(nodes=nodes, edges=edges, config=config)
+
+    # 5. Interactivity: Show details when a node is clicked
+    with col_details:
+        st.info("👆 Click a node to see details.")
+        
+        if return_value:
+            # Find the clicked node data
+            selected_node = next((n for n in graph_data['nodes'] if n['id'] == return_value), None)
+            
+            if selected_node:
+                st.image(selected_node['image'], width=100)
+                st.markdown(f"### {selected_node['label']}")
+                st.markdown(f"**Subscribers:** {int(selected_node['subscribers']):,}")
+                
+                # Find connected creators (neighbors)
+                st.markdown("#### Closest Connections:")
+                neighbors = []
+                for e in graph_data['edges']:
+                    if e['source'] == selected_node['id']:
+                        neighbors.append(e['target'])
+                    elif e['target'] == selected_node['id']:
+                        neighbors.append(e['source'])
+                
+                # Match IDs back to Names
+                neighbor_names = [n['label'] for n in graph_data['nodes'] if n['id'] in neighbors]
+                
+                if neighbor_names:
+                    for name in neighbor_names:
+                        st.caption(f"🔗 {name}")
+                else:
+                    st.write("No strong connections found.")
 
 # --- Main Application ---
 def main():
-    st.title("⚠️ Controversy Early Warning System Dashboard")
-    st.subheader("First version of project, using Hasan Piker's Dog Collar Incident of June 2024")
-    st.markdown("""
-    This dashboard presents the results of the first version of the
-    Controversy Early Warning System (CEWS) pipeline. The pipeline scrapes
-    YouTube comments from selected videos and analyzes them using local
-    machine learning models for:
-    * Sentiment Analysis.
-    * Keyword Extraction.
-    """
-    )
+    st.title("Content Creator Mapping") #"Controversy Early Warning System",)
+    
+    # Create Tabs
+    tab1, tab2 = st.tabs(["🔥 Scandal-O-Meter", "🌌 Creator Galaxy"])
 
-    # Load data
-    df = load_data(ANALYZED_CSV_PATH)
+    # --- TAB 1: SCANDAL METER ---
+    # with tab1:
+    #     df = load_scandal_data(ANALYZED_CSV_PATH)
+    #     if df is not None:
+    #         render_scandal_dashboard(df)
+    #     else:
+    #         st.warning("No scandal data found. Run Phase 1 pipeline.")
 
-    if df is None:
-        st.error(
-            f"Data not found in path: {ANALYZED_CSV_PATH}"
-            "Please rerun offline pipeline."
-        )
-        st.stop() # Stop the app from running further
-
-    # High Level View
-    total_comments = len(df)
-    sentiment_counts = df['sentiment_label'].value_counts()
-    
-    total_negative = sentiment_counts.get('Negative', 0)
-    total_positive = sentiment_counts.get('Positive', 0)
-    total_neutral = sentiment_counts.get('Neutral', 0)
-    
-    # Calculate the meter score
-    neg_percentage = (total_negative / total_comments) * 100 if total_comments > 0 else 0
-
-    # --- 1. The "Scandal-O-Meter" ---
-    st.header("'Scandal-O-Meter")
-    st.write("This score is the percentage of all analyzed comments that were flagged as 'Negative'.")
-    
-    # We use st.gauge to create a "speedometer" dial
-    # st.gauge(
-    #     value=neg_percentage,
-    #     min_value=0,
-    #     max_value=100,
-    #     label="Negative Sentiment %",
-    #     format_string=f"{neg_percentage:.1f}%"
-    # )
-
-    # --- 2. High-Level Sentiment Counts ---
-    st.header("Sentiment Breakdown")
-    
-    # Use columns for a clean KPI layout
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total Comments", f"{total_comments:,}")
-    col2.metric("Negative", f"{total_negative:,}")
-    col3.metric("Positive", f"{total_positive:,}")
-    col4.metric("Neutral", f"{total_neutral:,}")
-
-    # --- 3. Top Negative Keywords ---
-    st.header("🧾 Top Negative Keywords")
-    st.write("Most common phrases extracted from all 'Negative' YT comments.")
-    
-    # Get all negative comments
-    negative_comments = df[df['sentiment_label'] == 'Negative']
-    
-    # Split keywords and count them
-    keyword_counts = negative_comments['keywords'].str.split(', ').explode().value_counts()
-    
-    # Filter out empty strings (from comments with no keywords)
-    keyword_counts = keyword_counts[keyword_counts.index != '']
-    
-    # Display the top 20 keywords in a simple table
-    st.dataframe(
-        keyword_counts.head(20), 
-        column_config={"index": "Keyword", "value": "Count"},
-        width='stretch',
-    )
+    # --- TAB 2: CREATOR GALAXY ---
+    with tab2:
+        graph_data = load_graph_data(GRAPH_JSON_PATH)
+        if graph_data is not None:
+            render_creator_galaxy(graph_data)
+        else:
+            st.warning("No graph data found. Run `python run_pipeline.py` to build the graph.")
 
 if __name__ == "__main__":
     main()
