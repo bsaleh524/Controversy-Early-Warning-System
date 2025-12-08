@@ -93,7 +93,7 @@ def render_creator_galaxy(graph_data):
             nodes.append(Node(
                 id=n['id'],
                 label=n['label'],
-                size=25,
+                size=500,
                 shape="circularImage",
                 image=n['image'], # Displays their YouTube Avatar
                 title=f"{n['label']} ({n['subscribers']} subs)", # Hover text
