@@ -80,10 +80,20 @@ def build_graph(yt_client, rich_data_file=None):
     distance_matrix = 1 - similarity_matrix  # Convert similarity to distance
 
     # Use MDS to project high-dimensional embeddings to 2D x,y coordinates
-    mds = MDS(n_components=2, dissimilarity="precomputed", random_state=42)
-    # tsne = TSNE(n_components=2, random_state=42)
-    coords_mds = mds.fit_transform(distance_matrix)
-    # coords_tsne = tsne.fit_transform(embeddings)
+    # mds = MDS(n_components=2, dissimilarity="precomputed", random_state=42)
+    # coords_mds = mds.fit_transform(distance_matrix)
+
+    # Option 2: TSNE
+    n_samples = len(embeddings)
+    perplexity_val = min(5, max(1, n_samples - 1))
+    tsne = TSNE(
+        n_components=2,
+        perplexity=perplexity_val,
+        random_state=42,
+        init='pca',
+        learning_rate='auto'
+    )
+    coords_tsne = tsne.fit_transform(embeddings)
     
     # 5. Construct Graph
     nodes = []
@@ -96,12 +106,12 @@ def build_graph(yt_client, rich_data_file=None):
             "image": ch['thumbnail'],
             "subscribers": ch['subscribers'],
             # Scale coordinates slightly for better visualization spread
-            "x": float(coords_mds[i][0]) * 100, 
-            "y": float(coords_mds[i][1]) * 100,
+            "x": float(coords_tsne[i][0]) * 100, 
+            "y": float(coords_tsne[i][1]) * 100,
             "shape": "circularImage"
         })
         
-    SIMILARITY_THRESHOLD = 0.45 
+    SIMILARITY_THRESHOLD = 0.30 
     
     for i in range(len(channels)):
         for j in range(i + 1, len(channels)):
