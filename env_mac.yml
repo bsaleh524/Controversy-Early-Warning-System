@@ -2,7 +2,7 @@ name: contro
 channels:
   - conda-forge
 dependencies:
-  - python=3.12.10
+  - python=3.11.14
   - ipykernel
   - ipywidgets
   - google-api-python-client
@@ -18,6 +18,9 @@ dependencies:
   - keybert
   - streamlit
   - protobuf==3.20.*  # Fix for Google API compatibility issues
+  - pytorch-nightly::pytorch 
+  - pytorch-nightly::torchvision
+  - pytorch-nightly::torchaudio
   # - streamlit-agraph
   # - pip
   # - pip:
@@ -41,7 +44,7 @@ dependencies:
     # - torchvision
     # - --index-url https://download.pytorch.org/whl/cu128
     # - streamlit-agraph # May need to be installed seperately
-# mamba env remove -n contro_v1 --yes; mamba env create -f env_windows_fixing.yml
+# mamba env remove -n contro --yes; mamba env create -f env_windows.yml
 # requires mamba install with conda install mamba in base environment, then do the
 # mamba commands above to recreate the environment
 

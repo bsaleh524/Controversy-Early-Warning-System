@@ -3,24 +3,28 @@
 # Mix contains Gaming, Commentary, Politics
 CHANNEL_IDS:
   PewDiePie: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
-  # - MrBeast: "UCX6OQ3DkcsbYNE6H8uQQuVA"
+  MrBeast: "UCX6OQ3DkcsbYNE6H8uQQuVA"
   Markiplier: "UC7_YxT-KID8kRbqZo7MyscQ"
-  Jacksepticeye: "UChGJGhZ9SOOHvBB0Y4DOO_w"
-  # - HasanAbi: "UCtoaZpBnrd0lhycxYJ4MNOQ"
+  Ryan's World: "UChGJGhZ9SOOHvBB0Y4DOO_w"
+  Jacksepticeye: "UCYzPXprvl5Y-Sf0g4vX-m6g"
+  HasanAbi: "UCtoaZpBnrd0lhycxYJ4MNOQ"
   xQc: "UCmDTrq0LNgPodDOFZiSbsww"
   Ludwig: "UCrPseYLGpNygVi34QpGNqpA"
   MoistCr1TiKaL: "UCq6VFHwMzcMXbuKyG7SQYIg"
-  Kai Cenat: "UCqXLjvpUhqI1kwbS2855_7A"
-  IShowSpeed: "UCjC3ZVqS3y9QvFp_1WjF1-A"
-  # - H3 Podcast: "UCLtREJY21xRfCuEKvdki1Kw"
-  Marques Brownlee: "UCBJycsmduvYl917o249m0vQ"  # Tech (Control group)
-  Anthony Fantano: "UCt7fwAhXDy3oNFTAzF2o8Pw" # Music (Control group)
-  # - Destiny: "UC554eY5jNUfDq3yDOJYirOQ"
-  # - Vaush: "UC1E-JS8L0j1Ei70D9VEx98w"
-  # - The Majority Report: "UC-3jIAlnQmbbVMV6gR7K8aQ"
-  # - babish
-  # -maxmoefoe
-  # -coldones
+  Kai Cenat: "UCoEmptob-eEGKk18c2VplJg"
+  IShowSpeed: "UCWsDFcIhY2DBi3GB5uykGXA"
+  H3 Podcast: "UCLtREJY21xRfCuEKvdki1Kw"
+  heheProductions: "UCDWIvJwLJsE4LG1Atne2blQ"
+  Marques Brownlee: "UCBJycsmduvYEL83R_U4JriQ"  # Tech (Control group)
+  fantano: "UCnxQ8o9RpqxGF2oLHcCn9VQ" # Music (Control group)
+  Destiny: "UC554eY5jNUfDq3yDOJYirOQ"
+  VanossGaming: "UCKqH_9mk1waLgBiL2vT5b9g"
+  Vaush: "UC1E-JS8L0j1Ei70D9VEFrPQ"
+  The Majority Report: "UC-3jIAlnQmbbVMV6gR7K8aQ"
+  Binging with Babish: "UCJHA_jMfCvEnv-3kRjTCQXw"  # Cooking (Control group)
+  maxmoefoePokemon: "UCzPIY9Z0kRrJStr-5tbTjEQ"
+  coldones: "UCfbnTUxUech4P1XgYUwYuKA"
+  
   # -drdisrespect
   # -sykkuno
   # -lilypichu
