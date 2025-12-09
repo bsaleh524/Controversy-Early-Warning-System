@@ -17,6 +17,7 @@ dependencies:
   - sentence-transformers
   - keybert
   - streamlit
+  - beautifulsoup4
   - protobuf==3.20.*  # Fix for Google API compatibility issues
   # - streamlit-agraph
   # - pip

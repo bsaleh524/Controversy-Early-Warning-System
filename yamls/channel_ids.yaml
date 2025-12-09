@@ -1,77 +1,68 @@
-# Select a set of example people to make a graph
-# of first, then implement a live model.
-# Mix contains Gaming, Commentary, Politics
 CHANNEL_IDS:
-  PewDiePie: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
-  MrBeast: "UCX6OQ3DkcsbYNE6H8uQQuVA"
-  Markiplier: "UC7_YxT-KID8kRbqZo7MyscQ"
-  Ryan's World: "UChGJGhZ9SOOHvBB0Y4DOO_w"
-  Jacksepticeye: "UCYzPXprvl5Y-Sf0g4vX-m6g"
-  HasanAbi: "UCtoaZpBnrd0lhycxYJ4MNOQ"
-  xQc: "UCmDTrq0LNgPodDOFZiSbsww"
-  Ludwig: "UCrPseYLGpNygVi34QpGNqpA"
-  MoistCr1TiKaL: "UCq6VFHwMzcMXbuKyG7SQYIg"
-  Kai Cenat: "UCoEmptob-eEGKk18c2VplJg"
-  IShowSpeed: "UCWsDFcIhY2DBi3GB5uykGXA"
-  H3 Podcast: "UCLtREJY21xRfCuEKvdki1Kw"
-  heheProductions: "UCDWIvJwLJsE4LG1Atne2blQ"
-  Marques Brownlee: "UCBJycsmduvYEL83R_U4JriQ"  # Tech (Control group)
-  fantano: "UCnxQ8o9RpqxGF2oLHcCn9VQ" # Music (Control group)
-  Destiny: "UC554eY5jNUfDq3yDOJYirOQ"
-  VanossGaming: "UCKqH_9mk1waLgBiL2vT5b9g"
-  Vaush: "UC1E-JS8L0j1Ei70D9VEFrPQ"
-  The Majority Report: "UC-3jIAlnQmbbVMV6gR7K8aQ"
-  Binging with Babish: "UCJHA_jMfCvEnv-3kRjTCQXw"  # Cooking (Control group)
-  maxmoefoePokemon: "UCzPIY9Z0kRrJStr-5tbTjEQ"
-  coldones: "UCfbnTUxUech4P1XgYUwYuKA"
-  
-  # -drdisrespect
-  # -sykkuno
-  # -lilypichu
-  # -disguisedtoast
-  # -pokimane
-  # -ninja
-  # -shroud
-  # -timthetatman
-  # -dougdoug
-  # -pointcrow
-  # -Ludwig
-  # -CoryxKenshin
-  # -speeed
-  # -manlybadasshero
-  # -jaidenanimations
-  # -theodd1sout
-  # -dream
-  # -peanutbuttergamer
-  # -jeffnippard
-  # -codebullet
-  # -simonegiertz
-  # -ididathing
-  # -smartereveryday
-  # -bermpeakexpress
-  # -bravewilderness
-  # -markrober
-  # -dudeperfect
-  # -chilledchaos
-  # -annundefined
-  # -Zoneedsahobby
-  # -mikeboyd
-  # -mahalomydude
-  # -jordanboostmaster
-  # -yousuckatcooking
-  # -omarisuf
-  # -jontron
-  # -penguinz0
-  # -ai warehouse
-  # -neetcode
-  # -freecodecamp.org
-  # -tech with tim
-  # -alpharad
-  # -thestudio
-  # -william osman
-  # -greencode
-  # -3blue1brown
-  # -computerphile
-  # -neetcode
-  # -neetcodeio
-
+    3blue1brown: UCYO_jab_esuFRV4b17AJtAw
+    Binging with Babish: UCJHA_jMfCvEnv-3kRjTCQXw
+    CoryxKenshin: UCiYcA0gJzg855iSKMrX3oHg
+    Destiny: UC554eY5jNUfDq3yDOJYirOQ
+    H3 Podcast: UCLtREJY21xRfCuEKvdki1Kw
+    HasanAbi: UCtoaZpBnrd0lhycxYJ4MNOQ
+    IShowSpeed: UCWsDFcIhY2DBi3GB5uykGXA
+    Jacksepticeye: UCYzPXprvl5Y-Sf0g4vX-m6g
+    Kai Cenat: UCoEmptob-eEGKk18c2VplJg
+    Ludwig: UCrPseYLGpNygVi34QpGNqpA
+    Markiplier: UC7_YxT-KID8kRbqZo7MyscQ
+    Marques Brownlee: UCBJycsmduvYEL83R_U4JriQ
+    MoistCr1TiKaL: UCq6VFHwMzcMXbuKyG7SQYIg
+    MrBeast: UCX6OQ3DkcsbYNE6H8uQQuVA
+    PewDiePie: UC-lHJZR3Gqxm24_Vd_AJ5Yw
+    Ryan's World: UChGJGhZ9SOOHvBB0Y4DOO_w
+    The Majority Report: UC-3jIAlnQmbbVMV6gR7K8aQ
+    VanossGaming: UCKqH_9mk1waLgBiL2vT5b9g
+    Vaush: UC1E-JS8L0j1Ei70D9VEFrPQ
+    Zoneedsahobby: UCHpepgn8sIVmF-6FPuYNPfQ
+    ai warehouse: UCMT1Aw4R4nf_sFNDeuJqc6w
+    alpharad: UCBODyKF0JMbUd6D9Bklyzbw
+    annundefined: UCKfYEO0PeFvzyz6z87rYPEw
+    bermpeakexpress: UCOpP5PqrzODWpFU961acUbg
+    bravewilderness: UC6E2mP01ZLH_kbAyeazCNdg
+    chilledchaos: UCO5KTtyzcJK2R4VUhsCVYUQ
+    codebullet: UC0e3QhIYukixgh5VVpKHH9Q
+    coldones: UCfbnTUxUech4P1XgYUwYuKA
+    computerphile: UC9-y-6csu5WGm29I7JiwpnA
+    disguisedtoast: UCUT8RoNBTJvwW1iErP6-b-A
+    dougdoug: UClyGlKOhDUooPJFy4v_mqPg
+    drdisrespect: UCcJL2ld6kxy_nuV1u7PVQ0g
+    dream: UCTkXRDQl0luXxVQrRQvWS6w
+    dudeperfect: UCRijo3ddMTht_IHyNSNXpNQ
+    fantano: UCnxQ8o9RpqxGF2oLHcCn9VQ
+    greencode: UCFOOBOUf68HlXiRRYAIbdmQ
+    heheProductions: UCDWIvJwLJsE4LG1Atne2blQ
+    ididathing: UCJLZe_NoiG0hT7QCX_9vmqw
+    jaidenanimations: UCGwu0nbY2wSkW8N-cghnLpA
+    jeffnippard: UC68TLK0mAEzUyHx5x5k-S1Q
+    jontron: UCNqENNwS0IHYNJmHEyhsP5w
+    jordanboostmaster: UCRXcXvZt9NZHpZYIX8B8Qnw
+    lilypichu: UCvWU1K29wCZ8j1NsXsRrKnA
+    mahalomydude: UCeWaURbVb0kEFTpN2pB38cw
+    manlybadasshero: UCKv8Rrrdc9oxLJmdHItafLA
+    markrober: UCY1kMZp36IQSyNx_9h4mpCg
+    maxmoefoePokemon: UCzPIY9Z0kRrJStr-5tbTjEQ
+    mikeboyd: UCIRiWCPZoUyZDbydIqitHtQ
+    neetcode: UC_mYaQAE6-71rjSN6CeCA-g
+    neetcodeio: UCevUmOfLTUX9MNGJQKsPdIA
+    ninja: UCAW-NpUFkMyCNrvRSSGIvDQ
+    omarisuf: UCaHx0T1LWrVKWF1XfWWLSuw
+    peanutbuttergamer: UCRBkeMoYX02w-0qVIKNkruw
+    penguinz0: UCq6VFHwMzcMXbuKyG7SQYIg
+    pointcrow: UCG6zBb8GZKo1XZW4eHdg-0Q
+    pokimane: UChXKjLEzAB1K7EZQey7Fm1Q
+    shroud: UCoz3Kpu5lv-ALhR4h9bDvcw
+    simonegiertz: UC3KEoMzNz8eYnwBC34RaKCQ
+    smartereveryday: UC6107grRI4m0o2-emgoDnAA
+    sykkuno: UCRAEUAmW9kletIzOxhpLRFw
+    tech with tim: UC4JX40jDee_tINbkjycV4Sg
+    theodd1sout: UCo8bcnLyZH8tBIH9V1mLgqQ
+    thestudio: UCG7J20LhUeLl6y_Emi7OJrA
+    timthetatman: UCXBE_QQSZueB8082ml5fslg
+    william osman: UCfMJ2MchTSW2kWaT0kK94Yw
+    xQc: UCmDTrq0LNgPodDOFZiSbsww
+    yousuckatcooking: UCekQr9znsk2vWxBo3YiLq2w

@@ -18,6 +18,7 @@ dependencies:
   - keybert
   - streamlit
   - protobuf==3.20.*  # Fix for Google API compatibility issues
+  - beautifulsoup4
   - pytorch-nightly::pytorch 
   - pytorch-nightly::torchvision
   - pytorch-nightly::torchaudio
@@ -44,7 +45,7 @@ dependencies:
     # - torchvision
     # - --index-url https://download.pytorch.org/whl/cu128
     # - streamlit-agraph # May need to be installed seperately
-# mamba env remove -n contro --yes; mamba env create -f env_windows.yml
+# mamba env remove -n contro --yes; mamba env create -f env_mac.yml
 # requires mamba install with conda install mamba in base environment, then do the
 # mamba commands above to recreate the environment
 
