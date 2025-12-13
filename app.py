@@ -16,7 +16,7 @@ st.set_page_config(
 # --- Configuration ---
 DATA_DIR = Path("data")
 ANALYZED_CSV_PATH = DATA_DIR / "analyzed_data.csv"
-GRAPH_JSON_PATH = DATA_DIR / "graph_data.json"
+GRAPH_JSON_PATH = DATA_DIR / "fandom_graph_data.json"
 
 # --- Data Loading Functions ---
 
@@ -93,10 +93,10 @@ def render_creator_galaxy(graph_data):
             nodes.append(Node(
                 id=n['id'],
                 label=n['label'],
-                size=500,
+                size=50,
                 shape="circularImage",
                 image=n['image'], # Displays their YouTube Avatar
-                title=f"{n['label']} ({n['subscribers']} subs)", # Hover text
+                # title=f"{n['label']} ({n['subscribers']} subs)", # Hover text
                 # We use the calculated MDS coordinates for initial positioning
                 x=n.get('x', 0), 
                 y=n.get('y', 0)

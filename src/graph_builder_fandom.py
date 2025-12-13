@@ -1,144 +1,125 @@
 import os
 import json
-import pandas as pd
 import numpy as np
-from googleapiclient.discovery import build
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.manifold import MDS, TSNE
-from utils.youtube import setup_youtube_client, fetch_batch_channel_details, fetch_recent_video_titles
-from utils.scraper import load_channel_info
+from sklearn.manifold import TSNE
 
-
+# --- Configuration ---
 DATA_DIR = "data"
-YAML_DIR = "yamls"
-GRAPH_FILE_PATH = os.path.join(DATA_DIR, "graph_data.json")
+INPUT_FILE = os.path.join(DATA_DIR, "youtubers_data.json")
+OUTPUT_FILE = os.path.join(DATA_DIR, "fandom_graph_data.json")
 
-def build_graph(yt_client, rich_data_file=None):
+def build_fandom_graph():
     """
-    Main execution flow:
-    1. Fetch Channel Data
-    2. Generate Embeddings for Descriptions
-    3. Calculate 2D Coordinates (MDS) for Plotting
-    4. Calculate Similarity Edges
-    5. Save Nodes (with x,y) and Edges to JSON
+    Builds a semantic graph from scraped Fandom data.
     """
-    print("--- Starting Graph Builder ---")
-    
-    channels = []
-    
-    # 1. Try to load from cache first
-    if rich_data_file and os.path.exists(rich_data_file):
-        print(f"Loading cached rich data from {rich_data_file}...")
-        with open(rich_data_file, "r") as f:
-            channels = json.load(f)
-    else:
-        # --- Fetch Fresh Data ---
-        print("Cache not found or not used. Fetching fresh data from YouTube API...")
-        
-        channel_info_dict = load_channel_info(YAML_DIR)
-        target_ids = list(channel_info_dict.values())
-        
-        # Fetch details (Batch call)
-        print(f"Fetching details for {len(target_ids)} channels...")
-        channels = fetch_batch_channel_details(yt_client, target_ids)
-        
-        # Enrich with Video Titles
-        print("Fetching recent video titles to improve embeddings...")
-        
-        for ch in channels:
-            # Fetch last 10 videos for this specific channel
-            video_titles = fetch_recent_video_titles(yt_client, ch['uploads_playlist_id'], limit=10)
-            
-            # Combine them into a single string
-            titles_string = ", ".join(video_titles)
-            
-            # Create the "Rich Text" for the embedding model
-            rich_text = f"{ch['title']} - {ch['description']}. Recent Videos: {titles_string}"
-            
-            # Store it in the channel dict so we can save it
-            ch['rich_text'] = rich_text
-            print(f"  -> Enriched {ch['title']} with {len(video_titles)} titles.")
+    print("--- Starting Fandom Graph Builder ---")
 
-        # Save the rich data if a file path was provided
-        if rich_data_file:
-            print(f"Saving rich data to {rich_data_file}...")
-            with open(rich_data_file, "w") as f:
-                json.dump(channels, f, indent=2)
+    # 1. Load Data
+    if not os.path.exists(INPUT_FILE):
+        print(f"Error: {INPUT_FILE} not found. Run 'src/fandom_scraper.py' first.")
+        return
+
+    with open(INPUT_FILE, "r", encoding="utf-8") as f:
+        creators = json.load(f)
+    
+    print(f"Loaded {len(creators)} creators from {INPUT_FILE}")
+
+    if not creators:
+        print("No creators found in data. Exiting.")
+        return
 
     # 2. Generate Embeddings
-    print("Loading embedding model (this runs locally)...")
+    print("Loading embedding model (local)...")
     model = SentenceTransformer('all-MiniLM-L6-v2')
+
+    print("Generating embeddings from Fandom bios...")
+    # We combine Title + Description to ensure the model knows WHO it is + WHAT they do.
+    # We strip newlines to keep the input clean for the model.
+    text_corpus = []
+    for c in creators:
+        cleaned_description = c['description'].replace('\n', ' ')
+        text_corpus.append(f"{c['title']} - {cleaned_description}")
     
-    print("Generating embeddings for enriched channel data...")
-    # Extract the rich text from our channel list
-    rich_descriptions = [ch['rich_text'] for ch in channels]
-    embeddings = model.encode(rich_descriptions)
-    
-    # 3. Calculate Cosine Similarity Matrix
+    embeddings = model.encode(text_corpus)
+
+    # 3. Calculate Similarity & Coordinates
     print("Calculating relationships...")
+    
+    # Cosine Similarity for Edges
     similarity_matrix = cosine_similarity(embeddings)
-    distance_matrix = 1 - similarity_matrix  # Convert similarity to distance
-
-    # Use MDS to project high-dimensional embeddings to 2D x,y coordinates
-    # mds = MDS(n_components=2, dissimilarity="precomputed", random_state=42)
-    # coords_mds = mds.fit_transform(distance_matrix)
-
-    # Option 2: TSNE
+    
+    # t-SNE for 2D Layout (Nodes)
     n_samples = len(embeddings)
+    # Dynamic perplexity: must be < n_samples. 
+    # 30 is default, but for small datasets (<50), 2-5 is better.
     perplexity_val = min(5, max(1, n_samples - 1))
+    
+    print(f"Projecting to 2D using t-SNE (perplexity={perplexity_val})...")
     tsne = TSNE(
-        n_components=2,
-        perplexity=perplexity_val,
-        random_state=42,
-        init='pca',
+        n_components=2, 
+        perplexity=perplexity_val, 
+        random_state=42, 
+        init='pca', 
         learning_rate='auto'
     )
-    coords_tsne = tsne.fit_transform(embeddings)
-    
-    # 5. Construct Graph
+    coords = tsne.fit_transform(embeddings)
+
+    # 4. Construct Graph JSON
     nodes = []
     edges = []
-    
-    for i, ch in enumerate(channels):
+
+    # Create Nodes
+    for i, c in enumerate(creators):
+        # Format the tooltip title
+        if c['subscribers'] != "N/A":
+            tooltip = f"{c['title']} ({c['subscribers']} subs)"
+        else:
+            tooltip = c['title']
+
         nodes.append({
-            "id": ch['id'],
-            "label": ch['title'],
-            "image": ch['thumbnail'],
-            "subscribers": ch['subscribers'],
-            # Scale coordinates slightly for better visualization spread
-            "x": float(coords_tsne[i][0]) * 100, 
-            "y": float(coords_tsne[i][1]) * 100,
-            "shape": "circularImage"
+            "id": c['id'],
+            "label": c['title'],
+            "image": c['thumbnail'],
+            # Scale coordinates for better visual spread in the UI
+            "x": float(coords[i][0]) * 20, 
+            "y": float(coords[i][1]) * 20,
+            "shape": "circularImage",
+            "title": tooltip, # Used for hover text
+            # Add extra metadata for the UI sidebar
+            "meta_description": c['description'][:300] + "..." # Preview text
         })
-        
+
+    # Create Edges
+    # Threshold: Only draw lines if similarity is high enough
     SIMILARITY_THRESHOLD = 0.30 
-    
-    for i in range(len(channels)):
-        for j in range(i + 1, len(channels)):
+
+    for i in range(len(creators)):
+        for j in range(i + 1, len(creators)): # Avoid duplicates (A-B is same as B-A)
             score = float(similarity_matrix[i][j])
+            
             if score > SIMILARITY_THRESHOLD:
                 edges.append({
-                    "source": channels[i]['id'],
-                    "target": channels[j]['id'],
+                    "source": creators[i]['id'],
+                    "target": creators[j]['id'],
                     "weight": score,
-                    "label": f"{score:.2f}"
+                    "label": f"{score:.2f}" # Optional: show score on line
                 })
 
-    graph_data = {
+    # 5. Save
+    output_data = {
         "nodes": nodes,
         "edges": edges
     }
-    
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(GRAPH_FILE_PATH, 'w') as f:
-        json.dump(graph_data, f, indent=2)
-        
-    print(f"Graph built! {len(nodes)} nodes and {len(edges)} edges.")
-    print(f"Saved to {GRAPH_FILE_PATH}")
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(output_data, f, indent=2)
+
+    print(f"Graph built successfully!")
+    print(f"Nodes: {len(nodes)}")
+    print(f"Edges: {len(edges)}")
+    print(f"Saved to: {OUTPUT_FILE}")
 
 if __name__ == "__main__":
-    yt_client = setup_youtube_client()
-    # Define a default path for the rich data cache
-    CACHE_FILE = os.path.join(DATA_DIR, "rich_channel_data.json")
-    build_graph(yt_client, rich_data_file=CACHE_FILE)
+    build_fandom_graph()
