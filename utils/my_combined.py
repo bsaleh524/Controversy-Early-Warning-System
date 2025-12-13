@@ -103,6 +103,28 @@ def get_fandom_image(html_content):
 
     return "https://via.placeholder.com/150"
 
+def get_youtube_url(html_content):
+    """
+    Parses the HTML to find the 'YouTube Channel' link in the infobox.
+    """
+    soup = BeautifulSoup(html_content, "html.parser")
+    
+    # Target the infobox specifically to avoid random links in the bio
+    infobox = soup.select_one(".portable-infobox")
+    if not infobox:
+        return None
+        
+    # Look for any link containing youtube.com
+    # We prefer links that look like channel profiles
+    for a in infobox.find_all('a', href=True):
+        href = a['href']
+        if "youtube.com" in href or "youtu.be" in href:
+            # Common channel URL patterns
+            if any(x in href for x in ["/channel/", "/user/", "/c/", "/@"]):
+                return href
+            
+    return None
+
 # --- PART 2: Crawler Logic (Discovery) ---
 
 def get_soup_from_url(url):
@@ -185,7 +207,8 @@ def main(links=None):
         # Process Content
         bio_text = clean_wiki_text(html_content)
         image_url = get_fandom_image(html_content)
-        
+        youtube_url = get_youtube_url(html_content)
+
         # Filter out empty pages
         if not bio_text:
             print(f"  -> Skipping empty bio for {title}")
@@ -196,6 +219,7 @@ def main(links=None):
             "title": title,
             "description": bio_text,
             "thumbnail": image_url,
+            "youtube_url": youtube_url,
             "url": link
         })
         
@@ -210,6 +234,6 @@ def main(links=None):
 
 if __name__ == "__main__":
     # You can pass a specific list for testing, or leave empty to crawl
-    # test_links = ["https://youtube.fandom.com/wiki/Gamer_Chad", "https://youtube.fandom.com/wiki/Channel_Mat", "https://youtube.fandom.com/wiki/Supersnailboy"]
-    # main(test_links)
-    main()
+    test_links = ["https://youtube.fandom.com/wiki/Gamer_Chad", "https://youtube.fandom.com/wiki/Channel_Mat", "https://youtube.fandom.com/wiki/Supersnailboy"]
+    main(test_links)
+    # main()
