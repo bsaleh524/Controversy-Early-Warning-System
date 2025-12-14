@@ -7,8 +7,8 @@ from sklearn.manifold import TSNE
 
 # --- Configuration ---
 DATA_DIR = "data"
-INPUT_FILE = os.path.join(DATA_DIR, "youtubers_data.json")
-OUTPUT_FILE = os.path.join(DATA_DIR, "fandom_graph_data.json")
+INPUT_FILE = os.path.join(DATA_DIR, "youtubers_data_combined.json")
+OUTPUT_FILE = os.path.join(DATA_DIR, "graph", "fandom_graph_data_combined.json")
 
 def build_fandom_graph():
     """
@@ -39,7 +39,7 @@ def build_fandom_graph():
     # We strip newlines to keep the input clean for the model.
     text_corpus = []
     for c in creators:
-        cleaned_description = c['description'].replace('\n', ' ')
+        cleaned_description = c['description'].replace('\n', ' ')[:3000]
         text_corpus.append(f"{c['title']} - {cleaned_description}")
     
     embeddings = model.encode(text_corpus)
@@ -73,10 +73,10 @@ def build_fandom_graph():
     # Create Nodes
     for i, c in enumerate(creators):
         # Format the tooltip title
-        if c['subscribers'] != "N/A":
-            tooltip = f"{c['title']} ({c['subscribers']} subs)"
-        else:
-            tooltip = c['title']
+        # if c['subscribers'] != "N/A":
+        #     tooltip = f"{c['title']} ({c['subscribers']} subs)"
+        # else:
+        tooltip = c['title']
 
         nodes.append({
             "id": c['id'],
@@ -93,7 +93,7 @@ def build_fandom_graph():
 
     # Create Edges
     # Threshold: Only draw lines if similarity is high enough
-    SIMILARITY_THRESHOLD = 0.30 
+    SIMILARITY_THRESHOLD = 0.70
 
     for i in range(len(creators)):
         for j in range(i + 1, len(creators)): # Avoid duplicates (A-B is same as B-A)

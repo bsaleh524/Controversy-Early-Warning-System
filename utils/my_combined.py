@@ -234,6 +234,6 @@ def main(links=None):
 
 if __name__ == "__main__":
     # You can pass a specific list for testing, or leave empty to crawl
-    test_links = ["https://youtube.fandom.com/wiki/Gamer_Chad", "https://youtube.fandom.com/wiki/Channel_Mat", "https://youtube.fandom.com/wiki/Supersnailboy"]
-    main(test_links)
-    # main()
+    # test_links = ["https://youtube.fandom.com/wiki/Gamer_Chad", "https://youtube.fandom.com/wiki/Channel_Mat", "https://youtube.fandom.com/wiki/Supersnailboy"]
+    # main(test_links)
+    main()

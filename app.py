@@ -16,7 +16,7 @@ st.set_page_config(
 # --- Configuration ---
 DATA_DIR = Path("data")
 ANALYZED_CSV_PATH = DATA_DIR / "analyzed_data.csv"
-GRAPH_JSON_PATH = DATA_DIR / "fandom_graph_data.json"
+GRAPH_JSON_PATH = DATA_DIR / "graph/fandom_graph_data_combined.json"
 
 # --- Data Loading Functions ---
 
