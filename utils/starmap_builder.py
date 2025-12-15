@@ -6,11 +6,13 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
-
+# Do three components,(x,y,x)
+# Do tsne for 3 components
+# Ensure plotter properly grabs thumbnail
 # --- Configuration ---
 DATA_DIR = "data"
 INPUT_FILE = os.path.join(DATA_DIR, "youtubers_data_combined.json")
-OUTPUT_FILE = os.path.join(DATA_DIR, "plotly", "starmap_data.csv")
+OUTPUT_FILE = os.path.join(DATA_DIR, "plotly", "starmap_data_3.csv")
 
 def build_starmap():
     """
@@ -52,19 +54,19 @@ def build_starmap():
     # 3. Clustering (The "Genre" Detector)
     # We arbitrary pick 15 clusters. In a real app, you might optimize this.
     print("Clustering creators into genres...")
-    num_clusters = min(15, len(creators) // 2) # Safety check for small datasets
+    num_clusters = 15 # Safety check for small datasets
     kmeans = KMeans(n_clusters=num_clusters, random_state=42)
     clusters = kmeans.fit_predict(embeddings)
 
     # 4. Dimensionality Reduction (The "Map" Maker)
-    print("Projecting to 2D space...")
+    print("Projecting to 3D space...")
     
     # Dynamic perplexity to avoid crashes on small data
     n_samples = len(embeddings)
     perplexity_val = min(30, max(2, n_samples - 1))
     
     tsne = TSNE(
-        n_components=2, 
+        n_components=3, 
         perplexity=perplexity_val, 
         random_state=42, 
         init='pca', 
@@ -78,12 +80,13 @@ def build_starmap():
     df = pd.DataFrame({
         'id': [c['id'] for c in creators],
         'title': [c['title'] for c in creators],
-        'description': [c['description'][:200] + "..." for c in creators], # Truncate for CSV
+        'description': [c['description'] + "..." for c in creators], # Truncate for CSV
         'thumbnail': [c.get('thumbnail', '') for c in creators],
         'youtube_url': [c.get('youtube_url', '') for c in creators],
         'cluster_id': clusters,
         'x': coords[:, 0],
-        'y': coords[:, 1]
+        'y': coords[:, 1],
+        'z': coords[:, 2],
     })
 
     # Sort by cluster for cleaner legend

@@ -17,7 +17,7 @@ st.set_page_config(
 DATA_DIR = Path("data")
 # Note: Ensure you run the pipeline to generate these files!
 ANALYZED_CSV_PATH = DATA_DIR / "analyzed_data.csv"
-STARMAP_CSV_PATH = DATA_DIR / "plotly/starmap_data.csv"
+STARMAP_CSV_PATH = DATA_DIR / "plotly/starmap_data_3.csv"
 
 # --- Data Loading ---
 # @st.cache_data
@@ -97,97 +97,84 @@ def render_scandal_dashboard(df):
         st.info("No negative keywords found.")
 
 def render_starmap(df):
-    """Tab 2: The Creator Star Map"""
-    st.subheader("The Creator Galaxy (Star Map)")
+    """Tab 2: The Creator Galaxy (3D)"""
+    st.subheader("The Creator Galaxy (3D Star Map)")
     
     col_map, col_info = st.columns([3, 1])
     
     with col_map:
-        # Search Bar
-        search_query = st.text_input("🔍 Find a Creator (e.g. 'Hasan', 'Ludwig')", "")
+        search_query = st.text_input("🔍 Find a Creator (e.g. 'Markiplier', 'Ludwig')", "")
         
-        # Prepare Data for Plotting
-        df['color_group'] = df['cluster_id'].astype(str) # Default color is Cluster ID
-        df['size'] = 5 # Default size
+        # Data Prep
+        df['color_group'] = df['cluster_id'].astype(str)
+        df['size'] = 5 # Default size smaller for 3D density
         
         if search_query:
-            # Case-insensitive search
             mask = df['title'].str.contains(search_query, case=False, na=False)
             if mask.any():
-                # Highlight matches in Red and make them larger
                 df.loc[mask, 'color_group'] = 'Match' 
-                df.loc[mask, 'size'] = 15 
-                st.success(f"Found {mask.sum()} matches!")
+                df.loc[mask, 'size'] = 20 # Highlight size
+                st.success(f"Found {mask.sum()} matches! (Look for Red Stars)")
             else:
                 st.warning("No matches found.")
 
-        # Create the Interactive Plot
-        fig = px.scatter(
+        # --- 3D SCATTER PLOT ---
+        fig = px.scatter_3d(
             df, 
             x='x', 
             y='y', 
+            z='z',
             color='color_group',
             hover_name='title',
-            # We hide x/y/cluster from hover because they are abstract numbers
-            hover_data={'description': False, 'cluster_id': False, 'x': False, 'y': False, 'color_group': False},
+            hover_data={'description': False, 'cluster_id': True, 'x': False, 'y': False, 'z': False, 'color_group': True},
             custom_data=['thumbnail', 'description', 'title', 'youtube_url'],
             size='size',
-            size_max=15,
-            # If a match is found, make it bright Red. Otherwise use default colors.
+            size_max=20,
+            opacity=0.7, # Transparency helps see depth
             color_discrete_map={'Match': '#FF0000'}, 
-            render_mode='webgl', # Critical for performance with >5k points
-            title="Creator Semantic Clusters",
+            title="Creator Semantic Clusters (3D)"
         )
         
-        # Stylize the chart to look like a "Star Map"
         fig.update_layout(
-            height=700, 
-            plot_bgcolor='#0e1117',
+            height=800, 
+            scene=dict(
+                xaxis=dict(visible=False),
+                yaxis=dict(visible=False),
+                zaxis=dict(visible=False),
+                bgcolor='#0e1117' # Match Streamlit dark theme
+            ),
             paper_bgcolor='#0e1117',
             font=dict(color="white"),
-            xaxis=dict(showgrid=False, zeroline=False, visible=False),
-            yaxis=dict(showgrid=False, zeroline=False, visible=False),
             showlegend=False,
             margin=dict(l=0, r=0, t=30, b=0),
-            clickmode='event+select'
         )
         
-        # Display Plot & Capture Selection
+        # Render
         selected_points = st.plotly_chart(fig, width='stretch', on_select="rerun")
 
-    # Info Panel (Right Sidebar)
+    # Info Panel
     with col_info:
         st.info("👆 Click on a star to see details.")
         
         target_row = None
         
-        # Logic 1: User clicked a specific point
         if selected_points and selected_points['selection']['points']:
             point_index = selected_points['selection']['points'][0]['point_index']
             target_row = df.iloc[point_index]
-        
-        # Logic 2: User searched, and we default to the first result
         elif search_query and df['color_group'].eq('Match').any():
             target_row = df[df['color_group'] == 'Match'].iloc[0]
 
-        # Render the Details Panel
         if target_row is not None:
-            # 1. Image
             if pd.notna(target_row['thumbnail']) and str(target_row['thumbnail']).startswith('http'):
                 st.image(target_row['thumbnail'], width=150)
             
-            # 2. Title
             st.markdown(f"### {target_row['title']}")
             
-            # 3. YouTube Link (The new feature!)
             yt_url = str(target_row['youtube_url']).strip()
             if yt_url and yt_url.startswith('http'):
                 st.markdown(f"**[📺 Visit YouTube Channel]({yt_url})**")
             
-            # 4. Cluster Info
             st.caption(f"Cluster Group: {target_row['cluster_id']}")
-            
-            # 5. Bio
             st.markdown("---")
             st.markdown("**Bio Preview:**")
             st.write(target_row['description'])
@@ -195,23 +182,21 @@ def render_starmap(df):
 # --- Main ---
 def main():
     st.title("📉 Controversy Early Warning System")
-    
-    # Define Tabs
     tab1, tab2 = st.tabs(["🔥 Scandal-O-Meter", "🌌 Creator Galaxy"])
 
-    # Render Tab 1
     # with tab1:
     #     df = load_scandal_data(ANALYZED_CSV_PATH)
-    #     if df is not None: 
-    #         render_scandal_dashboard(df)
-    #     else: 
-    #         st.warning(f"No scandal data found at {ANALYZED_CSV_PATH}. Run Phase 1 pipeline.")
+    #     if df is not None: render_scandal_dashboard(df)
+    #     else: st.warning(f"No scandal data found at {ANALYZED_CSV_PATH}. Run Phase 1 pipeline.")
 
-    # Render Tab 2
     with tab2:
         df_map = load_starmap_data(STARMAP_CSV_PATH)
+        # Check if Z axis exists (in case user runs old pipeline)
         if df_map is not None: 
-            render_starmap(df_map)
+            if 'z' not in df_map.columns:
+                st.error("⚠️ Data is 2D. Please run `python src/starmap_builder.py` to regenerate 3D data.")
+            else:
+                render_starmap(df_map)
         else: 
             st.warning(f"No star map data found at {STARMAP_CSV_PATH}. Run 'src/starmap_builder.py'.")
 
