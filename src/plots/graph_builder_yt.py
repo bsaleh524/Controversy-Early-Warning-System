@@ -7,7 +7,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.manifold import MDS, TSNE
 from src.scrapers.youtube.youtube import setup_youtube_client, fetch_batch_channel_details, fetch_recent_video_titles
-from src.utils.load_yamls import load_channel_info
+from src.utils.load_data import load_channel_info
 
 DATA_DIR = "data"
 YAML_DIR = "yamls"

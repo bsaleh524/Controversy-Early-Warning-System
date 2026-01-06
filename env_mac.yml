@@ -22,10 +22,13 @@ dependencies:
   - pytorch-nightly::pytorch 
   - pytorch-nightly::torchvision
   - pytorch-nightly::torchaudio
+  - google-genai
   # - streamlit-agraph
   # - pip
-  # - pip:
+  - pip:
     # Core Data Science (Install via Pip to avoid DLL conflicts with Torch)
+    - streamlit-plotly-events
+    - umap-learn
     # - numpy
     # - pandas
     # - matplotlib

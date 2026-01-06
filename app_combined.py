@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import os
@@ -16,7 +17,7 @@ st.set_page_config(
 # --- Configuration ---
 DATA_DIR = Path("data")
 ANALYZED_CSV_PATH = DATA_DIR / "analyzed_data.csv"
-STARMAP_CSV_PATH = DATA_DIR / "plotly/starmap_data_3.csv"
+STARMAP_CSV_PATH = DATA_DIR / "processed/plotly/starmap_data_tsne_trimmed_60_labeled.csv"
 
 # --- Data Loading ---
 @st.cache_data
@@ -103,47 +104,55 @@ def render_starmap(df):
             search_query = st.text_input("🔍 Find a Creator", "")
         with c2:
             # Get unique clusters for the dropdown
-            if 'cluster_id' in df.columns:
-                clusters = sorted(df['cluster_id'].unique())
+            if 'cluster_name' in df.columns:
+                clusters = sorted(df['cluster_name'].unique())
                 cluster_options = ["All"] + [str(c) for c in clusters]
             else:
+                clusters = []
                 cluster_options = ["All"]
             selected_cluster = st.selectbox("🎨 Highlight Group", cluster_options)
         
         # --- Data Prep ---
         # 1. Base State
-        df['color_group'] = df['cluster_id'].astype(str)
+        df['color_group'] = df['cluster_name'].astype(str)
         df['size'] = 3 # Default size
         
-        # 2. Apply Cluster Highlight
+        # 2. Generate a Stable Color Map BEFORE filtering
+        # This ensures Cluster 5 is always the same color, even if it's the only one shown.
+        # We combine a few palettes to ensure we have enough distinct colors for ~20+ clusters.
+        palette = px.colors.qualitative.Dark24 + px.colors.qualitative.Light24
+
+        cluster_color_map = {
+            str(c): palette[i % len(palette)] 
+            for i, c in enumerate(clusters)
+        }
+
+        # Add our special UI colors
+        cluster_color_map['Match'] = '#FF0000'     # Bright Red for Search
+        cluster_color_map['Background'] = '#222222' # Dark Gray for Dimmed items
+
+
         if selected_cluster != "All":
             # Identify rows that do NOT match the selection
-            mask_unselected = df['cluster_id'].astype(str) != selected_cluster
+            mask_unselected = df['cluster_name'].astype(str) != selected_cluster
             
             # "Turn small" and gray out the unselected
             df.loc[mask_unselected, 'size'] = 1
             df.loc[mask_unselected, 'color_group'] = 'Background' # This groups them all into one gray color
             
             # Highlight selected (keep original color ID, just make slightly bigger)
-            mask_selected = df['cluster_id'].astype(str) == selected_cluster
-            df.loc[mask_selected, 'size'] = 10
+            mask_selected = df['cluster_name'].astype(str) == selected_cluster
+            df.loc[mask_selected, 'size'] = 15
 
         # 3. Apply Search Highlight (Overrides Cluster logic for visibility)
         if search_query:
             mask_search = df['title'].str.contains(search_query, case=False, na=False)
             if mask_search.any():
                 df.loc[mask_search, 'color_group'] = 'Match' 
-                df.loc[mask_search, 'size'] = 50 # Super big
+                df.loc[mask_search, 'size'] = 60 # Super big
                 st.success(f"Found {mask_search.sum()} matches! (Look for Red Stars)")
             else:
                 st.warning("No text matches found.")
-
-        # --- 3D SCATTER PLOT ---
-        # Define specific colors: Red for search, Dark Gray for background noise
-        color_map = {
-            'Match': '#FF0000', 
-            'Background': '#222222' 
-        }
         
         fig = px.scatter_3d(
             df, 
@@ -153,7 +162,7 @@ def render_starmap(df):
             color='color_group',
             hover_name='title',
             hover_data={
-                'description': False, 'cluster_id': False, 
+                'description': False, 'cluster_name': False, 
                 'x': False, 'y': False, 'z': False, 
                 'color_group': False, 'size': False
             },
@@ -161,7 +170,7 @@ def render_starmap(df):
             size='size',
             size_max=14,
             opacity=0.7,
-            color_discrete_map=color_map, # Apply our custom colors
+            color_discrete_map=cluster_color_map, # Apply our custom colors
             title="Creator Semantic Clusters (3D)"
         )
         
@@ -178,16 +187,19 @@ def render_starmap(df):
             showlegend=True,
             legend=dict(itemsizing='constant'), # Keeps legend icons consistent size
             margin=dict(l=0, r=0, t=30, b=0),
+            clickmode='event+select' # <-- CRITICAL: Enables click events on points
         )
         
+        # Use width='stretch' instead of width='stretch' for best Streamlit compatibility
         selected_points = st.plotly_chart(fig, width='stretch', on_select="rerun")
 
     # Info Panel
     with col_info:
-        st.info("👆 Click on a star to see details.")
+        st.info("👆 Click on a star or Search to see details.")
         
         target_row = None
         
+        # Priority: Check Click Selection -> Check Search Match
         if selected_points and selected_points['selection']['points']:
             point_index = selected_points['selection']['points'][0]['point_index']
             target_row = df.iloc[point_index]
@@ -195,6 +207,7 @@ def render_starmap(df):
             target_row = df[df['color_group'] == 'Match'].iloc[0]
 
         if target_row is not None:
+            # --- 1. Basic Details ---
             if pd.notna(target_row['thumbnail']) and str(target_row['thumbnail']).startswith('http'):
                 st.image(target_row['thumbnail'], width=150)
             
@@ -204,10 +217,49 @@ def render_starmap(df):
             if yt_url and yt_url.startswith('http'):
                 st.markdown(f"**[📺 Visit YouTube Channel]({yt_url})**")
             
-            st.caption(f"Cluster Group: {target_row['cluster_id']}")
+            st.caption(f"Cluster Group: {target_row['cluster_name']}")
             st.markdown("---")
+            
+            # --- 2. Truncated Description ---
             st.markdown("**Bio Preview:**")
-            st.write(target_row['description'])
+            desc = str(target_row['description'])
+            if len(desc) > 300:
+                desc = desc[:300] + "..."
+            st.write(desc)
+            
+            st.markdown("---")
+            
+            # --- 3. Nearest Neighbors Logic (NEW) ---
+            st.markdown("#### 🔭 Closest Creators")
+            
+            # Get coordinates of the selected target
+            tx, ty, tz = target_row['x'], target_row['y'], target_row['z']
+            
+            # Calculate Euclidean distance to ALL other points (Vectorized)
+            # dist = sqrt((x2-x1)^2 + (y2-y1)^2 + (z2-z1)^2)
+            distances = np.sqrt(
+                (df['x'] - tx)**2 + 
+                (df['y'] - ty)**2 + 
+                (df['z'] - tz)**2
+            )
+            
+            # Create a small temp dataframe for sorting
+            df_neighbors = df.copy()
+            df_neighbors['distance'] = distances
+            
+            # Filter out the creator themselves (distance approx 0) and get top 5
+            closest_df = df_neighbors[df_neighbors['distance'] > 0.0001].nsmallest(5, 'distance')
+            
+            # Display nicely formatted table
+            st.dataframe(
+                closest_df[['title', 'cluster_name']],
+                column_config={
+                    "title": "Creator",
+                    "cluster_name": "Group",
+                },
+                hide_index=True,
+                width='stretch'
+            )
 
 # --- Main ---
 def main():

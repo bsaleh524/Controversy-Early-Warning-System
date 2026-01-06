@@ -4,15 +4,14 @@ import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.manifold import TSNE, MDS
+from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 # Do three components,(x,y,x)
 # Do tsne for 3 components
 # Ensure plotter properly grabs thumbnail
 # --- Configuration ---
 DATA_DIR = "data"
-INPUT_FILE = os.path.join(DATA_DIR, "youtubers_data_combined.json")
-OUTPUT_FILE = os.path.join(DATA_DIR, "plotly", "starmap_data_3mds.csv")
+INPUT_FILE = os.path.join(DATA_DIR, "fandom", "youtubers_data_combined.json")
 
 def build_starmap():
     """
@@ -54,7 +53,7 @@ def build_starmap():
     # 3. Clustering (The "Genre" Detector)
     # We arbitrary pick 15 clusters. In a real app, you might optimize this.
     print("Clustering creators into genres...")
-    num_clusters = 15 # Safety check for small datasets
+    num_clusters = 60 #25 #15 # Safety check for small datasets
     kmeans = KMeans(n_clusters=num_clusters, random_state=42)
     clusters = kmeans.fit_predict(embeddings)
 
@@ -97,9 +96,10 @@ def build_starmap():
 
     # Sort by cluster for cleaner legend
     df.sort_values('cluster_id', inplace=True)
-    
-    df.to_csv(OUTPUT_FILE, index=False)
-    print(f"Done! Saved {len(df)} nodes to {OUTPUT_FILE}")
+    output_file = os.path.join(DATA_DIR, "processed", "plotly", f"starmap_data_tsne_{num_clusters}.csv")
+
+    df.to_csv(output_file, index=False)
+    print(f"Done! Saved {len(df)} nodes to {output_file}")
 
 if __name__ == "__main__":
     build_starmap()
