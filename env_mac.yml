@@ -29,6 +29,7 @@ dependencies:
     # Core Data Science (Install via Pip to avoid DLL conflicts with Torch)
     - streamlit-plotly-events
     - umap-learn
+    - einops
     # - numpy
     # - pandas
     # - matplotlib

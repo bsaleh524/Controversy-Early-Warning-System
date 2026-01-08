@@ -21,8 +21,11 @@ dependencies:
   - protobuf==3.20.*  # Fix for Google API compatibility issues
   # - streamlit-agraph
   # - pip
-  # - pip:
+  - pip:
     # Core Data Science (Install via Pip to avoid DLL conflicts with Torch)
+    - streamlit-plotly-events
+    - umap-learn
+    - einops
     # - numpy
     # - pandas
     # - matplotlib
