@@ -6,6 +6,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
+from umap import UMAP
 # Do three components,(x,y,x)
 # Do tsne for 3 components
 # Ensure plotter properly grabs thumbnail
@@ -13,7 +14,7 @@ from sklearn.cluster import KMeans
 DATA_DIR = "data"
 INPUT_FILE = os.path.join(DATA_DIR, "fandom", "youtubers_data_combined.json")
 
-def build_starmap():
+def build_starmap(reduction_method="tsne"):
     """
     1. Loads scraped data.
     2. Generates embeddings.
@@ -53,25 +54,42 @@ def build_starmap():
     # 3. Clustering (The "Genre" Detector)
     # We arbitrary pick 15 clusters. In a real app, you might optimize this.
     print("Clustering creators into genres...")
-    num_clusters = 60 #25 #15 # Safety check for small datasets
+    num_clusters = 120 #25 #15 # Safety check for small datasets
     kmeans = KMeans(n_clusters=num_clusters, random_state=42)
     clusters = kmeans.fit_predict(embeddings)
 
-    # 4. Dimensionality Reduction (The "Map" Maker)
-    print("Projecting to 3D space...")
     
-    # Dynamic perplexity to avoid crashes on small data
-    n_samples = len(embeddings)
+    if reduction_method == "tsne":
+        # 4. Dimensionality Reduction (The "Map" Maker)
+        print("Projecting to 3D space with TSNE...")
 
-    perplexity_val = min(30, max(2, n_samples - 1))
-    tsne = TSNE(
-        n_components=3, 
-        perplexity=perplexity_val, 
-        random_state=42, 
-        init='pca', 
-        learning_rate='auto'
-    )
-    coords = tsne.fit_transform(embeddings)
+        # Dynamic perplexity to avoid crashes on small data
+        n_samples = len(embeddings)
+
+        perplexity_val = min(30, max(2, n_samples - 1))
+        tsne = TSNE(
+            n_components=3, 
+            perplexity=perplexity_val, 
+            random_state=42, 
+            init='pca', 
+            learning_rate='auto'
+        )
+        coords = tsne.fit_transform(embeddings)
+    elif reduction_method == "umap":
+        # 4. Dimensionality Reduction (The "Map" Maker)
+        print("Projecting to 3D space with UMAP...")
+        # UMAP parameters:
+        # n_neighbors: Controls local vs global structure (low = local, high = global). 15 is default.
+        # min_dist: Controls how tightly points are packed. 0.1 is usually good for visualization.
+        # metric: 'cosine' is often better for text embeddings than 'euclidean'.
+        reducer = UMAP(
+            n_components=3,
+            n_neighbors=30,
+            min_dist=0.1,
+            metric='cosine',
+            random_state=42
+        )
+        coords = reducer.fit_transform(embeddings)
 
     # mds = MDS(n_components=3, dissimilarity="precomputed", random_state=42)
     # similarity_matrix = cosine_similarity(embeddings)
@@ -96,10 +114,10 @@ def build_starmap():
 
     # Sort by cluster for cleaner legend
     df.sort_values('cluster_id', inplace=True)
-    output_file = os.path.join(DATA_DIR, "processed", "plotly", f"starmap_data_tsne_{num_clusters}.csv")
+    output_file = os.path.join(DATA_DIR, "processed", "plotly", f"starmap_data_{reduction_method}_{num_clusters}.csv")
 
     df.to_csv(output_file, index=False)
     print(f"Done! Saved {len(df)} nodes to {output_file}")
 
 if __name__ == "__main__":
-    build_starmap()
+    build_starmap(reduction_method="tsne")
